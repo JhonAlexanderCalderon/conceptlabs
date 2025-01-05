@@ -175,7 +175,7 @@
                     formData.append('file', file);
 
                     try {
-                        const response = await fetch('http://localhost:5000/process-audio', {
+                        const response = await fetch('https://conceptlabs-keys.up.railway.app/process-audio', {
                             method: 'POST',
                             body: formData
                         });
