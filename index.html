@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Machine Issue Reporter</title>
-    <link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
@@ -33,12 +32,7 @@
 
         .logo img {
             width: 150px;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.7));
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         textarea {
@@ -54,7 +48,7 @@
             outline: none;
         }
 
-        .feedback-box {
+         .feedback-box {
             width: 100%;
             padding: 15px;
             border: none;
@@ -71,31 +65,28 @@
         .button-group {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             margin-top: 20px;
         }
 
         .icon-button {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             border: none;
             border-radius: 50%;
             background-color: #1e90ff;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             cursor: pointer;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, background-color 0.3s;
-            outline: none;
             background-size: 50%;
             background-repeat: no-repeat;
             background-position: center;
         }
 
         .icon-button:active {
-            background-color: #ff4500;
             transform: scale(0.9);
+            background-color: #ff4500;
         }
 
         .voice-button {
@@ -106,23 +97,21 @@
             background-image: url('cam.png');
         }
 
-        .submit-button {
+        button.submit-button {
             width: 100%;
             padding: 15px;
-            margin-top: 20px;
             border: none;
             border-radius: 10px;
-            background-color: #6b8e23;/*olive green*/
+            margin-top: 15px;
+            background-color: #6b8e23; /* Olive green */
             color: #ffffff;
             font-size: 1.2rem;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
         }
 
-        .submit-button:hover {
-            background-color: #80800;
-            transform: scale(1.05);
+        button.submit-button:hover {
+            background-color: #556b2f;
         }
     </style>
 </head>
@@ -131,12 +120,8 @@
         <div class="logo">
             <img src="concept-labs-logo.png" alt="Concept Labs Logo">
         </div>
-        <div class="form-group">
-            <textarea id="issue" rows="4" placeholder="Describe the issue..."></textarea>
-        </div>
-        <div class="feedback-box" id="feedbackBox">
-            Feedback will appear here...
-        </div>
+        <textarea id="issue" rows="4" placeholder="Describe the issue..."></textarea>
+        <div class="feedback-box" id="feedbackBox">Feedback will appear here...</div>
         <div class="button-group">
             <button class="icon-button voice-button" id="voiceButton"></button>
             <button class="icon-button photo-button" id="photoButton"></button>
@@ -147,39 +132,85 @@
     <script>
         const issueInput = document.getElementById('issue');
         const voiceButton = document.getElementById('voiceButton');
+        const photoButton = document.getElementById('photoButton');
         const submitButton = document.getElementById('submitButton');
         const feedbackBox = document.getElementById('feedbackBox');
 
-        const webhookURL = "https://conceptlabs.app.n8n.cloud/webhook-test/b66d6043-af54-4fb2-872d-fa345cde310d";
+        const webhookURL = "https://conceptlabs.app.n8n.cloud/webhook-test/machine-issue-report";
 
+        // Voice Recognition
+        const recognition = 'webkitSpeechRecognition' in window ? new webkitSpeechRecognition() : null;
+
+        if (recognition) {
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+
+            voiceButton.addEventListener('mousedown', () => {
+                recognition.start();
+                feedbackBox.textContent = 'Recording...';
+            });
+
+            voiceButton.addEventListener('mouseup', () => {
+                recognition.stop();
+            });
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                issueInput.value = transcript;
+                feedbackBox.textContent = 'Voice input added.';
+            };
+
+            recognition.onerror = (event) => {
+                feedbackBox.textContent = 'Voice recognition error: ' + event.error;
+            };
+        } else {
+            feedbackBox.textContent = 'Voice recognition not supported in this browser.';
+        }
+
+        // Photo Upload
+        photoButton.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.capture = 'camera';
+            input.onchange = (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    feedbackBox.textContent = 'Photo selected: ' + file.name;
+                } else {
+                    feedbackBox.textContent = 'No photo selected.';
+                }
+            };
+            input.click();
+        });
+
+        // Submit Data
         submitButton.addEventListener('click', async () => {
             const issueText = issueInput.value.trim();
             if (!issueText) {
-                feedbackBox.textContent = "Please describe the issue before submitting.";
+                feedbackBox.textContent = 'Please describe the issue before submitting.';
                 return;
             }
 
             const payload = {
                 issue: issueText,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
             };
 
             try {
                 const response = await fetch(webhookURL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
                 });
 
                 if (response.ok) {
-                    feedbackBox.textContent = "Issue successfully reported!";
+                    feedbackBox.textContent = 'Issue reported successfully!';
                 } else {
-                    feedbackBox.textContent = `Error reporting the issue. Status: ${response.status}`;
+                    throw new Error('Failed to submit the issue.');
                 }
             } catch (error) {
-                feedbackBox.textContent = `Error: ${error.message}`;
+                feedbackBox.textContent = 'Error: ' + error.message;
             }
         });
     </script>
