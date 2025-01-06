@@ -92,6 +92,25 @@
             background-image: url('cam.png');
         }
 
+        .submit-button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 10px;
+            background-color: #32cd32;
+            color: #ffffff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .submit-button:hover {
+            background-color: #28a745;
+            transform: scale(1.05);
+        }
+
         .message {
             margin-top: 20px;
             font-size: 1.2rem;
@@ -118,77 +137,101 @@
             <button class="icon-button voice-button" id="voiceButton"></button>
             <button class="icon-button photo-button" id="photoButton"></button>
         </div>
+        <button class="submit-button" id="submitButton">Submit</button>
         <div id="message" class="message"></div>
     </div>
 
     <script>
-       const issueInput = document.getElementById('issue');
-const voiceButton = document.getElementById('voiceButton');
-const messageDiv = document.getElementById('message');
+        const issueInput = document.getElementById('issue');
+        const voiceButton = document.getElementById('voiceButton');
+        const photoButton = document.getElementById('photoButton');
+        const submitButton = document.getElementById('submitButton');
+        const messageDiv = document.getElementById('message');
 
-// Check for Speech Recognition API
-const recognition = 'webkitSpeechRecognition' in window ? new webkitSpeechRecognition() : null;
+        // Voice Recognition Functionality
+        const recognition = 'webkitSpeechRecognition' in window ? new webkitSpeechRecognition() : null;
 
-if (recognition) {
-    recognition.lang = 'en-US';
-    recognition.continuous = false;
+        if (recognition) {
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
 
-    // Start recognition when holding the button
-    voiceButton.addEventListener('mousedown', () => {
-        recognition.start();
-        voiceButton.style.backgroundColor = '#ff4500'; // Indicate recording
-        messageDiv.textContent = 'Recording...';
-        messageDiv.classList.remove('error', 'success');
-    });
-
-    // Stop recognition when releasing the button
-    voiceButton.addEventListener('mouseup', () => {
-        recognition.stop();
-        voiceButton.style.backgroundColor = '#1e90ff';
-    });
-
-    // On recognition result
-    recognition.onresult = async (event) => {
-        const transcript = event.results[0][0].transcript;
-        issueInput.value = transcript; // Update the text input with recognized speech
-
-        // Send transcription to the backend for further processing
-        const payload = {
-            issue: transcript,
-            timestamp: new Date().toISOString(),
-        };
-
-        try {
-            const response = await fetch('https://conceptlabs-keys.up.railway.app/process-audio', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
+            voiceButton.addEventListener('mousedown', () => {
+                recognition.start();
+                voiceButton.style.backgroundColor = '#ff4500';
+                messageDiv.textContent = 'Recording...';
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                messageDiv.textContent = 'Processed: ' + data.transcription;
-                messageDiv.classList.add('success');
-            } else {
-                throw new Error('Failed to process audio');
-            }
-        } catch (error) {
-            messageDiv.textContent = 'Error: ' + error.message;
+            voiceButton.addEventListener('mouseup', () => {
+                recognition.stop();
+                voiceButton.style.backgroundColor = '#1e90ff';
+            });
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                issueInput.value = transcript;
+            };
+
+            recognition.onerror = (event) => {
+                messageDiv.textContent = 'Voice recognition error: ' + event.error;
+                messageDiv.classList.add('error');
+            };
+        } else {
+            voiceButton.disabled = true;
+            messageDiv.textContent = 'Voice recognition not supported on this browser.';
             messageDiv.classList.add('error');
         }
-    };
 
-    recognition.onerror = (event) => {
-        messageDiv.textContent = 'Voice recognition error: ' + event.error;
-        messageDiv.classList.add('error');
-    };
-} else {
-    voiceButton.disabled = true;
-    messageDiv.textContent = 'Voice recognition not supported on this browser.';
-    messageDiv.classList.add('error');
-}
+        // Photo Upload Functionality
+        photoButton.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.capture = 'camera';
+            input.onchange = (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    messageDiv.textContent = 'Photo selected: ' + file.name;
+                    messageDiv.classList.add('success');
+                }
+            };
+            input.click();
+        });
+
+        // Submit Functionality
+        submitButton.addEventListener('click', async () => {
+            const issueText = issueInput.value.trim();
+            if (!issueText) {
+                messageDiv.textContent = 'Please describe the issue before submitting.';
+                messageDiv.classList.add('error');
+                return;
+            }
+
+            const payload = {
+                issue: issueText,
+                timestamp: new Date().toISOString(),
+            };
+
+            try {
+                const response = await fetch('https://conceptlabs-keys.up.railway.app/process-audio', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    messageDiv.textContent = 'Issue submitted successfully: ' + data.transcription;
+                    messageDiv.classList.add('success');
+                } else {
+                    throw new Error('Failed to submit the issue');
+                }
+            } catch (error) {
+                messageDiv.textContent = 'Error: ' + error.message;
+                messageDiv.classList.add('error');
+            }
+        });
     </script>
 </body>
 </html>
