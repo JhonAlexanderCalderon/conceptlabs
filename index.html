@@ -32,10 +32,11 @@
 
         .logo img {
             width: 150px;
-            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
+            margin-bottom: 25px;
         }
 
-        textarea {
+         textarea {
             width: 100%;
             padding: 15px;
             border: none;
@@ -136,9 +137,9 @@
         const submitButton = document.getElementById('submitButton');
         const feedbackBox = document.getElementById('feedbackBox');
 
-        const webhookURL = "https://conceptlabs.app.n8n.cloud/webhook-test/machine-issue-report";
+        const webhookURL = "https://conceptlabs.app.n8n.cloud/webhook-test/b66d6043-af54-4fb2-872d-fa345cde310d";
 
-        // Voice Recognition
+        // Advanced Voice Recognition
         const recognition = 'webkitSpeechRecognition' in window ? new webkitSpeechRecognition() : null;
 
         if (recognition) {
@@ -205,6 +206,7 @@
                 });
 
                 if (response.ok) {
+                    const data = await response.json();
                     feedbackBox.textContent = 'Issue reported successfully!';
                 } else {
                     throw new Error('Failed to submit the issue.');
