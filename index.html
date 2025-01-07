@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Concept Labs - Main Menu</title>
+    <title>Concept Labs</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
@@ -13,86 +13,115 @@
             background-color: #0b0c0e;
             color: #f1f1f1;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
             height: 100vh;
             background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
         }
 
-        .container {
-            text-align: center;
-        }
-
         .logo img {
             width: 150px;
             filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.7));
-            margin-bottom: 50px;
+            margin-top: 20px;
         }
 
-        .icon-group {
+        .button-group {
             display: flex;
             justify-content: center;
-            gap: 50px;
+            gap: 40px;
+            margin-top: 50px;
         }
 
-        .icon-button {
-            width: 100px;
-            height: 100px;
-            border: none;
+        .main-button {
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            background-color: #1e90ff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, background-color 0.3s;
-            outline: none;
-            background-size: 60%;
+            background-color: transparent;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            background-size: 50%;
             background-repeat: no-repeat;
             background-position: center;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+            transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
         }
 
-        .icon-button:active {
-            background-color: #ff4500;
-            transform: scale(0.9);
+        .main-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 30px rgba(255, 255, 255, 0.7);
         }
 
-        .reports-button {
-            background-image: url('reports.png');
+        .main-button:active {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
         }
 
         .tasks-button {
             background-image: url('tasks.png');
         }
 
+        .reports-button {
+            background-image: url('reports.png');
+        }
+
         .formulas-button {
             background-image: url('formulas.png');
+        }
+
+        .button-label {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1.2rem;
+            color: #f1f1f1;
+        }
+
+        .footer {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
-            <img src="concept-labs-logo.png" alt="Concept Labs Logo">
+    <div class="logo">
+        <img src="concept-labs-logo.png" alt="Concept Labs Logo">
+    </div>
+    <div class="button-group">
+        <div>
+            <button class="main-button tasks-button" id="tasksButton"></button>
+            <div class="button-label">Tasks</div>
         </div>
-        <div class="icon-group">
-            <button class="icon-button reports-button" id="reportsButton"></button>
-            <button class="icon-button tasks-button" id="tasksButton"></button>
-            <button class="icon-button formulas-button" id="formulasButton"></button>
+        <div>
+            <button class="main-button reports-button" id="reportsButton"></button>
+            <div class="button-label">Reports</div>
+        </div>
+        <div>
+            <button class="main-button formulas-button" id="formulasButton"></button>
+            <div class="button-label">Formulas</div>
         </div>
     </div>
+    <div class="footer">Agents</div>
 
     <script>
-        document.getElementById('reportsButton').addEventListener('click', () => {
-            window.location.href = 'reports.html';
-        });
+        // Navigation functionality for the buttons
+        const tasksButton = document.getElementById('tasksButton');
+        const reportsButton = document.getElementById('reportsButton');
+        const formulasButton = document.getElementById('formulasButton');
 
-        document.getElementById('tasksButton').addEventListener('click', () => {
+        tasksButton.addEventListener('click', () => {
             window.location.href = 'tasks.html';
         });
 
-        document.getElementById('formulasButton').addEventListener('click', () => {
+        reportsButton.addEventListener('click', () => {
+            window.location.href = 'reports.html';
+        });
+
+        formulasButton.addEventListener('click', () => {
             window.location.href = 'formulas.html';
         });
     </script>
