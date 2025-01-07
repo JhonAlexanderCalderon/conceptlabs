@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Concept Labs - Main Menu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <title>Reports</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -20,80 +20,111 @@
         }
 
         .container {
+            background: rgba(20, 20, 20, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            max-width: 500px;
+            width: 100%;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
         }
 
         .logo img {
             width: 150px;
             filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.7));
-            margin-bottom: 50px;
+            margin-bottom: 25px;
         }
 
-        .icon-group {
-            display: flex;
-            justify-content: center;
-            gap: 50px;
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            font-weight: 600;
         }
 
-        .icon-button {
-            width: 100px;
-            height: 100px;
+        #reportsContent {
+            background-color: rgba(40, 40, 40, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .report {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: rgba(60, 60, 60, 0.9);
+            border-radius: 5px;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 50px;
+            height: 50px;
+            background-image: url('agent.png');
+            background-size: cover;
             border: none;
-            border-radius: 50%;
-            background-color: #1e90ff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             cursor: pointer;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, background-color 0.3s;
-            outline: none;
-            background-size: 60%;
-            background-repeat: no-repeat;
-            background-position: center;
+            transition: transform 0.2s ease;
         }
 
-        .icon-button:active {
-            background-color: #ff4500;
-            transform: scale(0.9);
-        }
-
-        .reports-button {
-            background-image: url('reports.png');
-        }
-
-        .tasks-button {
-            background-image: url('tasks.png');
-        }
-
-        .formulas-button {
-            background-image: url('formulas.png');
+        .back-button:hover {
+            transform: scale(1.1);
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <button class="back-button" id="backButton"></button>
         <div class="logo">
             <img src="concept-labs-logo.png" alt="Concept Labs Logo">
         </div>
-        <div class="icon-group">
-            <button class="icon-button reports-button" id="reportsButton"></button>
-            <button class="icon-button tasks-button" id="tasksButton"></button>
-            <button class="icon-button formulas-button" id="formulasButton"></button>
+        <h1>Reports</h1>
+        <div id="reportsContent">
+            <!-- Dynamic content will be displayed here -->
+            <p>Loading reports...</p>
         </div>
     </div>
 
     <script>
-        document.getElementById('reportsButton').addEventListener('click', () => {
-            window.location.href = 'reports.html';
+        const reportsContent = document.getElementById('reportsContent');
+        const backButton = document.getElementById('backButton');
+
+        // Example dynamic content for reports
+        const exampleReports = [
+            { id: 1, name: 'Report 1', date: '2025-01-06', description: 'Routine maintenance completed.' },
+            { id: 2, name: 'Report 2', date: '2025-01-05', description: 'Machine malfunction reported.' },
+            { id: 3, name: 'Report 3', date: '2025-01-04', description: 'Safety inspection completed.' }
+        ];
+
+        // Display reports dynamically
+        function loadReports(reports) {
+            reportsContent.innerHTML = ''; // Clear existing content
+            reports.forEach(report => {
+                const reportElement = document.createElement('div');
+                reportElement.className = 'report';
+                reportElement.innerHTML = `
+                    <strong>${report.name}</strong><br>
+                    <em>Date: ${report.date}</em><br>
+                    <p>${report.description}</p>
+                `;
+                reportsContent.appendChild(reportElement);
+            });
+        }
+
+        // Load reports on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadReports(exampleReports); // Replace with fetch logic for real data if necessary
         });
 
-        document.getElementById('tasksButton').addEventListener('click', () => {
-            window.location.href = 'tasks.html';
-        });
-
-        document.getElementById('formulasButton').addEventListener('click', () => {
-            window.location.href = 'formulas.html';
+        // Go back to index
+        backButton.addEventListener('click', () => {
+            window.location.href = 'index.html';
         });
     </script>
 </body>
