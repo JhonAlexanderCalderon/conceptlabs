@@ -7,10 +7,10 @@ app = Flask(__name__, static_folder='.')
 # Set your OpenAI API key from environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Serve the default page (reports.html)
+# Serve the default page (index.html)
 @app.route('/')
-def serve_reports():
-    return send_from_directory('.', 'reports.html')
+def serve_index():
+    return send_from_directory('.', 'index.html')
 
 # Serve static files (e.g., images, CSS, JavaScript)
 @app.route('/<path:path>')
