@@ -60,8 +60,8 @@
         }
 
         textarea, .feedback-box {
-            width: 90%; /* Make them smaller than 100% to center better */
-            margin: 10px auto; /* Center horizontally with auto margins */
+            width: 90%; 
+            margin: 10px auto;
             padding: 15px;
             border: none;
             border-radius: 10px;
@@ -70,7 +70,7 @@
             font-size: 1rem;
             box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
             outline: none;
-            box-sizing: border-box; /* Include padding in width calculation */
+            box-sizing: border-box;
         }
 
         .feedback-box {
@@ -123,7 +123,7 @@
             border: none;
             border-radius: 10px;
             margin: 15px auto;
-            background-color: #6b8e23; /* Olive green */
+            background-color: #6b8e23;
             color: #ffffff;
             font-size: 1.2rem;
             cursor: pointer;
@@ -154,11 +154,82 @@
 
     <script>
         const backButton = document.getElementById('backButton');
+        const voiceButton = document.getElementById('voiceButton');
+        const photoButton = document.getElementById('photoButton');
+        const submitButton = document.getElementById('submitButton');
+        const feedbackBox = document.getElementById('feedbackBox');
+        const issueInput = document.getElementById('issue');
+        const webhookURL = "https://conceptlabs.app.n8n.cloud/webhook-test/machine-issue-report";
+
         backButton.addEventListener('click', () => {
-            window.location.href = 'index.html'; // Navigate to index.html
+            window.location.href = 'index.html';
         });
 
-        // Other existing functionality...
+        const recognition = 'webkitSpeechRecognition' in window ? new webkitSpeechRecognition() : null;
+
+        if (recognition) {
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+
+            voiceButton.addEventListener('mousedown', () => {
+                recognition.start();
+                feedbackBox.textContent = 'Recording...';
+            });
+
+            voiceButton.addEventListener('mouseup', () => {
+                recognition.stop();
+            });
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                issueInput.value = transcript;
+                feedbackBox.textContent = 'Voice input added.';
+            };
+
+            recognition.onerror = (event) => {
+                feedbackBox.textContent = 'Voice recognition error: ' + event.error;
+            };
+        } else {
+            feedbackBox.textContent = 'Voice recognition not supported.';
+        }
+
+        photoButton.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.capture = 'camera';
+            input.onchange = (event) => {
+                const file = event.target.files[0];
+                feedbackBox.textContent = file ? 'Photo selected: ' + file.name : 'No photo selected.';
+            };
+            input.click();
+        });
+
+        submitButton.addEventListener('click', async () => {
+            const issueText = issueInput.value.trim();
+            if (!issueText) {
+                feedbackBox.textContent = 'Please describe the issue.';
+                return;
+            }
+
+            const payload = { issue: issueText, timestamp: new Date().toISOString() };
+
+            try {
+                const response = await fetch(webhookURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                if (response.ok) {
+                    feedbackBox.textContent = 'Issue submitted successfully!';
+                } else {
+                    throw new Error('Failed to submit the issue.');
+                }
+            } catch (error) {
+                feedbackBox.textContent = 'Error: ' + error.message;
+            }
+        });
     </script>
 </body>
 </html>
