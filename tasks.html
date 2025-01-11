@@ -160,6 +160,7 @@
         const feedbackBox = document.getElementById('feedbackBox');
         const issueInput = document.getElementById('issue');
         const webhookURL = "https://conceptlabs.app.n8n.cloud/webhook-test/4382471f-ef12-47db-98ad-d8c75587d976";
+        const authToken = "Bearer abc123def456ghi789"; // Reemplaza con tu token
 
         backButton.addEventListener('click', () => {
             window.location.href = 'index.html';
@@ -217,7 +218,10 @@
             try {
                 const response = await fetch(webhookURL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': authToken
+                    },
                     body: JSON.stringify(payload),
                 });
 
