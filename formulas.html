@@ -152,94 +152,104 @@
         <button class="submit-button" id="submitButton">Submit</button>
     </div>
 
-    <script>
-        const backButton = document.getElementById('backButton');
-        const voiceButton = document.getElementById('voiceButton');
-        const photoButton = document.getElementById('photoButton');
-        const submitButton = document.getElementById('submitButton');
-        const feedbackBox = document.getElementById('feedbackBox');
-        const issueInput = document.getElementById('issue');
-        const webhookURL = "https://conceptlabs.app.n8n.cloud/webhook/9ba11544-5c4e-4f91-818a-08a4ecb596c5";
-        const authToken = "Bearer abc123def456ghi789"; // token
+   <script>
+    const backButton = document.getElementById('backButton');
+    const voiceButton = document.getElementById('voiceButton');
+    const photoButton = document.getElementById('photoButton');
+    const submitButton = document.getElementById('submitButton');
+    const feedbackBox = document.getElementById('feedbackBox');
+    const issueInput = document.getElementById('issue');
+    const webhookURL = "https://conceptlabs.app.n8n.cloud/webhook/9ba11544-5c4e-4f91-818a-08a4ecb596c5";
+    const authToken = "Bearer abc123def456ghi789"; // token
 
-        backButton.addEventListener('click', () => {
-            window.location.href = 'index.html';
-        });
-
-        const recognition = 'webkitSpeechRecognition' in window ? new webkitSpeechRecognition() : null;
-
-        if (recognition) {
-            recognition.lang = 'en-US';
-            recognition.continuous = false;
-
-            voiceButton.addEventListener('mousedown', () => {
-                recognition.start();
-                feedbackBox.textContent = 'Recording...';
-            });
-
-            voiceButton.addEventListener('mouseup', () => {
-                recognition.stop();
-            });
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                issueInput.value = transcript;
-                feedbackBox.textContent = 'Voice input added.';
-            };
-
-            recognition.onerror = (event) => {
-                feedbackBox.textContent = 'Voice recognition error: ' + event.error;
-            };
-        } else {
-            feedbackBox.textContent = 'Voice recognition not supported.';
-        }
-
-        photoButton.addEventListener('click', () => {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.capture = 'camera';
-            input.onchange = (event) => {
-                const file = event.target.files[0];
-                feedbackBox.textContent = file ? 'Photo selected: ' + file.name : 'No photo selected.';
-            };
-            input.click();
-        });
-
-        submitButton.addEventListener('click', async () => {
-            const issueText = issueInput.value.trim();
-            if (!issueText) {
-                feedbackBox.textContent = 'Please describe the issue.';
-                return;
-            }
-
-            const payload = { 
-    issue: issueText, 
-    timestamp: new Date().toISOString(), 
-    requestId: Math.random().toString(36).substring(7) 
-};
-
-try {
-    const response = await fetch(webhookURL, {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': authToken
-        },
-        body: JSON.stringify(payload),
+    backButton.addEventListener('click', () => {
+        window.location.href = 'index.html';
     });
 
-    if (response.ok) {
-        const data = await response.json();
-        feedbackBox.textContent = data.output; 
-    } else {
-        throw new Error('Failed to submit the issue.');
-    }
-} catch (error) {
-    feedbackBox.textContent = 'Error: ' + error.message;
-}
+    const recognition = 'webkitSpeechRecognition' in window ? new webkitSpeechRecognition() : null;
 
+    if (recognition) {
+        recognition.lang = 'en-US';
+        recognition.continuous = false;
+
+        let isRecording = false; // Estado de grabación
+
+        voiceButton.addEventListener('click', () => {
+            if (!isRecording) {
+                recognition.start();
+                isRecording = true;
+                feedbackBox.textContent = 'Recording...';
+            } else {
+                recognition.stop();
+                isRecording = false;
+                feedbackBox.textContent = 'Recording stopped.';
+            }
         });
-    </script>
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            issueInput.value = transcript;
+            feedbackBox.textContent = 'Voice input added.';
+        };
+
+        recognition.onerror = (event) => {
+            feedbackBox.textContent = 'Voice recognition error: ' + event.error;
+            isRecording = false;
+        };
+
+        recognition.onend = () => {
+            isRecording = false;
+            feedbackBox.textContent = 'Recording ended.';
+        };
+    } else {
+        feedbackBox.textContent = 'Voice recognition not supported.';
+    }
+
+    photoButton.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'camera';
+        input.onchange = (event) => {
+            const file = event.target.files[0];
+            feedbackBox.textContent = file ? 'Photo selected: ' + file.name : 'No photo selected.';
+        };
+        input.click();
+    });
+
+    submitButton.addEventListener('click', async () => {
+        const issueText = issueInput.value.trim();
+        if (!issueText) {
+            feedbackBox.textContent = 'Please describe the issue.';
+            return;
+        }
+
+        const payload = { 
+            issue: issueText, 
+            timestamp: new Date().toISOString(), 
+            requestId: Math.random().toString(36).substring(7) 
+        };
+
+        try {
+            const response = await fetch(webhookURL, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                feedbackBox.textContent = data.output; 
+            } else {
+                throw new Error('Failed to submit the issue.');
+            }
+        } catch (error) {
+            feedbackBox.textContent = 'Error: ' + error.message;
+        }
+    });
+</script>
 </body>
 </html>
