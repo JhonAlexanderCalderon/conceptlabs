@@ -6,135 +6,7 @@
     <title>Formulas</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #0b0c0e;
-            color: #f1f1f1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
-        }
-
-        .container {
-            background: rgba(20, 20, 20, 0.9);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
-            max-width: 500px;
-            width: 100%;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-        }
-
-        .logo img {
-            width: 150px;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.7));
-            margin-bottom: 25px;
-        }
-
-        .back-button {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 60px;
-            height: 60px;
-            background-color: transparent;
-            background-image: url('agent.png');
-            background-size: cover;
-            background-repeat: no-repeat;
-            border: 3px solid rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .back-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 30px rgba(255, 255, 255, 0.7);
-        }
-
-        textarea, .feedback-box {
-            width: 90%; 
-            margin: 10px auto;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            background-color: rgba(40, 40, 40, 0.9);
-            color: #f1f1f1;
-            font-size: 1rem;
-            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
-            outline: none;
-            box-sizing: border-box;
-        }
-
-        .feedback-box {
-            background-color: rgba(30, 30, 30, 0.9);
-            height: 100px;
-            overflow-y: auto;
-        }
-
-        .button-group {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .icon-button {
-            width: 80px;
-            height: 80px;
-            border: none;
-            border-radius: 50%;
-            background-color: #1e90ff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, background-color 0.3s;
-            outline: none;
-            background-size: 50%;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-
-        .icon-button:active {
-            transform: scale(0.9);
-            background-color: #ff4500;
-        }
-
-        .voice-button {
-            background-image: url('mic.png');
-        }
-
-        .photo-button {
-            background-image: url('cam.png');
-        }
-
-        button.submit-button {
-            width: 90%;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            margin: 15px auto;
-            background-color: #6b8e23;
-            color: #ffffff;
-            font-size: 1.2rem;
-            cursor: pointer;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-            box-sizing: border-box;
-            display: block;
-        }
-
-        button.submit-button:hover {
-            background-color: #556b2f;
-        }
+        /* Tu CSS existente */
     </style>
 </head>
 <body>
@@ -162,10 +34,12 @@
         const webhookURL = "https://conceptlabs.app.n8n.cloud/webhook/9ba11544-5c4e-4f91-818a-08a4ecb596c5";
         const authToken = "Bearer abc123def456ghi789"; // token
 
+        // Botón de retroceso
         backButton.addEventListener('click', () => {
             window.location.href = 'index.html';
         });
 
+        // Configuración de reconocimiento de voz
         const recognition = 'webkitSpeechRecognition' in window ? new webkitSpeechRecognition() : null;
 
         if (recognition) {
@@ -175,25 +49,34 @@
             voiceButton.addEventListener('mousedown', () => {
                 recognition.start();
                 feedbackBox.textContent = 'Recording...';
+                console.log('Voice recognition started');
             });
 
             voiceButton.addEventListener('mouseup', () => {
                 recognition.stop();
+                console.log('Voice recognition stopped');
             });
 
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
                 issueInput.value = transcript;
-                feedbackBox.textContent = 'Voice input added.';
+                feedbackBox.textContent = 'Voice input added: ' + transcript;
+                console.log('Transcription received: ', transcript);
             };
 
             recognition.onerror = (event) => {
                 feedbackBox.textContent = 'Voice recognition error: ' + event.error;
+                console.error('Recognition error: ', event.error);
+            };
+
+            recognition.onend = () => {
+                console.log('Recognition ended');
             };
         } else {
             feedbackBox.textContent = 'Voice recognition not supported.';
         }
 
+        // Botón para subir fotos
         photoButton.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -202,43 +85,49 @@
             input.onchange = (event) => {
                 const file = event.target.files[0];
                 feedbackBox.textContent = file ? 'Photo selected: ' + file.name : 'No photo selected.';
+                console.log('Photo selected: ', file?.name);
             };
             input.click();
         });
 
+        // Botón para enviar datos
         submitButton.addEventListener('click', async () => {
             const issueText = issueInput.value.trim();
             if (!issueText) {
                 feedbackBox.textContent = 'Please describe the issue.';
+                console.warn('No issue text provided');
                 return;
             }
 
             const payload = { 
-    issue: issueText, 
-    timestamp: new Date().toISOString(), 
-    requestId: Math.random().toString(36).substring(7) 
-};
+                issue: issueText, 
+                timestamp: new Date().toISOString(), 
+                requestId: Math.random().toString(36).substring(7) 
+            };
 
-try {
-    const response = await fetch(webhookURL, {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': authToken
-        },
-        body: JSON.stringify(payload),
-    });
+            try {
+                console.log('Sending payload:', payload);
 
-    if (response.ok) {
-        const data = await response.json();
-        feedbackBox.textContent = data.output; 
-    } else {
-        throw new Error('Failed to submit the issue.');
-    }
-} catch (error) {
-    feedbackBox.textContent = 'Error: ' + error.message;
-}
+                const response = await fetch(webhookURL, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': authToken
+                    },
+                    body: JSON.stringify(payload),
+                });
 
+                if (response.ok) {
+                    const data = await response.json();
+                    feedbackBox.textContent = 'Response: ' + (data.output || 'Submitted successfully');
+                    console.log('Response from server: ', data);
+                } else {
+                    throw new Error('Failed to submit the issue. Status: ' + response.status);
+                }
+            } catch (error) {
+                feedbackBox.textContent = 'Error: ' + error.message;
+                console.error('Submission error: ', error);
+            }
         });
     </script>
 </body>
