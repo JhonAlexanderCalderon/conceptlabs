@@ -213,23 +213,32 @@
                 return;
             }
 
-            const payload = { issue: issueText, timestamp: new Date().toISOString() };
+            const payload = { 
+    issue: issueText, 
+    timestamp: new Date().toISOString(), 
+    requestId: Math.random().toString(36).substring(7) 
+};
 
-            try {
-                const response = await fetch(webhookURL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                });
+try {
+    const response = await fetch(webhookURL, {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': authToken
+        },
+        body: JSON.stringify(payload),
+    });
 
-                if (response.ok) {
-                    feedbackBox.textContent = 'Issue submitted successfully!';
-                } else {
-                    throw new Error('Failed to submit the issue.');
-                }
-            } catch (error) {
-                feedbackBox.textContent = 'Error: ' + error.message;
-            }
+    if (response.ok) {
+        const data = await response.json();
+        feedbackBox.textContent = data.output; 
+    } else {
+        throw new Error('Failed to submit the issue.');
+    }
+} catch (error) {
+    feedbackBox.textContent = 'Error: ' + error.message;
+}
+
         });
     </script>
 </body>
