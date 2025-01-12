@@ -28,11 +28,35 @@
             width: 100%;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
         }
 
         .logo img {
             width: 150px;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.7));
             margin-bottom: 25px;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 60px;
+            height: 60px;
+            background-color: transparent;
+            background-image: url('agent.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .back-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 30px rgba(255, 255, 255, 0.7);
         }
 
         textarea, .feedback-box {
@@ -46,9 +70,11 @@
             font-size: 1rem;
             box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
             outline: none;
+            box-sizing: border-box;
         }
 
         .feedback-box {
+            background-color: rgba(30, 30, 30, 0.9);
             height: 100px;
             overflow-y: auto;
         }
@@ -71,16 +97,23 @@
             align-items: center;
             cursor: pointer;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, background-color 0.3s;
+            outline: none;
             background-size: 50%;
             background-repeat: no-repeat;
             background-position: center;
         }
 
-        .icon-button.voice-button {
+        .icon-button:active {
+            transform: scale(0.9);
+            background-color: #ff4500;
+        }
+
+        .voice-button {
             background-image: url('mic.png');
         }
 
-        .icon-button.photo-button {
+        .photo-button {
             background-image: url('cam.png');
         }
 
@@ -94,6 +127,9 @@
             color: #ffffff;
             font-size: 1.2rem;
             cursor: pointer;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+            display: block;
         }
 
         button.submit-button:hover {
@@ -103,11 +139,12 @@
 </head>
 <body>
     <div class="container">
+        <button class="back-button" id="backButton" title="Back"></button>
         <div class="logo">
             <img src="concept-labs-logo.png" alt="Concept Labs Logo">
         </div>
-        <textarea id="issue" rows="4" placeholder="Describe your issue..."></textarea>
-        <div class="feedback-box" id="feedbackBox">Feedback will appear here.</div>
+        <textarea id="issue" rows="4" placeholder="Anything related to a formula or SDS that I can help you with?"></textarea>
+        <div class="feedback-box" id="feedbackBox">Lab related issues</div>
         <div class="button-group">
             <button class="icon-button voice-button" id="voiceButton"></button>
             <button class="icon-button photo-button" id="photoButton"></button>
@@ -116,13 +153,18 @@
     </div>
 
     <script>
+        const backButton = document.getElementById('backButton');
         const voiceButton = document.getElementById('voiceButton');
         const photoButton = document.getElementById('photoButton');
         const submitButton = document.getElementById('submitButton');
         const feedbackBox = document.getElementById('feedbackBox');
         const issueInput = document.getElementById('issue');
         const webhookURL = "https://conceptlabs.app.n8n.cloud/webhook/9ba11544-5c4e-4f91-818a-08a4ecb596c5";
-        const authToken = "Bearer abc123def456ghi789";
+        const authToken = "Bearer abc123def456ghi789"; // token
+
+        backButton.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
 
         const recognition = 'webkitSpeechRecognition' in window ? new webkitSpeechRecognition() : null;
 
@@ -132,7 +174,7 @@
 
             voiceButton.addEventListener('mousedown', () => {
                 recognition.start();
-                feedbackBox.textContent = 'Listening...';
+                feedbackBox.textContent = 'Recording...';
             });
 
             voiceButton.addEventListener('mouseup', () => {
@@ -142,14 +184,14 @@
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
                 issueInput.value = transcript;
-                feedbackBox.textContent = 'Voice captured: ' + transcript;
+                feedbackBox.textContent = 'Voice input added.';
             };
 
             recognition.onerror = (event) => {
-                feedbackBox.textContent = 'Error: ' + event.error;
+                feedbackBox.textContent = 'Voice recognition error: ' + event.error;
             };
         } else {
-            feedbackBox.textContent = 'Voice recognition not supported in this browser.';
+            feedbackBox.textContent = 'Voice recognition not supported.';
         }
 
         photoButton.addEventListener('click', () => {
@@ -166,37 +208,37 @@
 
         submitButton.addEventListener('click', async () => {
             const issueText = issueInput.value.trim();
-
             if (!issueText) {
                 feedbackBox.textContent = 'Please describe the issue.';
                 return;
             }
 
-            const payload = {
-                issue: issueText,
-                timestamp: new Date().toISOString(),
-                requestId: Math.random().toString(36).substring(7)
-            };
+            const payload = { 
+    issue: issueText, 
+    timestamp: new Date().toISOString(), 
+    requestId: Math.random().toString(36).substring(7) 
+};
 
-            try {
-                const response = await fetch(webhookURL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': authToken
-                    },
-                    body: JSON.stringify(payload)
-                });
+try {
+    const response = await fetch(webhookURL, {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': authToken
+        },
+        body: JSON.stringify(payload),
+    });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    feedbackBox.textContent = 'Response: ' + (data.output || 'Submitted successfully');
-                } else {
-                    throw new Error('Submission failed. Status: ' + response.status);
-                }
-            } catch (error) {
-                feedbackBox.textContent = 'Error: ' + error.message;
-            }
+    if (response.ok) {
+        const data = await response.json();
+        feedbackBox.textContent = data.output; 
+    } else {
+        throw new Error('Failed to submit the issue.');
+    }
+} catch (error) {
+    feedbackBox.textContent = 'Error: ' + error.message;
+}
+
         });
     </script>
 </body>
