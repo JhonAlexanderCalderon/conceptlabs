@@ -166,30 +166,41 @@
             window.location.href = 'index.html';
         });
 
-        const recognition = 'webkitSpeechRecognition' in window ? new webkitSpeechRecognition() : null;
+         const recognition = 'webkitSpeechRecognition' in window ? new webkitSpeechRecognition() : null;
 
-        if (recognition) {
-            recognition.lang = 'en-US';
-            recognition.continuous = false;
+    if (recognition) {
+        recognition.lang = 'en-US';
+        recognition.continuous = false;
 
-            voiceButton.addEventListener('mousedown', () => {
+        let isRecording = false; // Estado de grabación
+
+        voiceButton.addEventListener('click', () => {
+            if (!isRecording) {
                 recognition.start();
+                isRecording = true;
                 feedbackBox.textContent = 'Recording...';
-            });
-
-            voiceButton.addEventListener('mouseup', () => {
+            } else {
                 recognition.stop();
-            });
+                isRecording = false;
+                feedbackBox.textContent = 'Recording stopped.';
+            }
+        });
 
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                issueInput.value = transcript;
-                feedbackBox.textContent = 'Voice input added.';
-            };
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            issueInput.value = transcript;
+            feedbackBox.textContent = 'Voice input added.';
+        };
 
-            recognition.onerror = (event) => {
-                feedbackBox.textContent = 'Voice recognition error: ' + event.error;
-            };
+        recognition.onerror = (event) => {
+            feedbackBox.textContent = 'Voice recognition error: ' + event.error;
+            isRecording = false;
+        };
+
+        recognition.onend = () => {
+            isRecording = false;
+            feedbackBox.textContent = 'Recording ended.';
+        };
         } else {
             feedbackBox.textContent = 'Voice recognition not supported.';
         }
